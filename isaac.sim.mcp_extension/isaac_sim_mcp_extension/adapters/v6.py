@@ -31,7 +31,7 @@ import numpy as np
 
 from .base import IsaacAdapterBase, collect_prims, drop_stale_bytecode, spherical_to_cartesian
 from .transforms import read_transform, set_transform
-from .units import limit_units, normalize_limit
+from .units import gain_units, limit_units, normalize_gain, normalize_limit
 from .version import version_string
 
 if TYPE_CHECKING:
@@ -795,8 +795,14 @@ class IsaacAdapterV6(IsaacAdapterBase):
                         stiffness_attr = drive_api.GetStiffnessAttr()
                         damping_attr = drive_api.GetDampingAttr()
                         target_attr = drive_api.GetTargetPositionAttr()
-                        joint_data["stiffness"] = stiffness_attr.Get() if stiffness_attr else None
-                        joint_data["damping"] = damping_attr.Get() if damping_attr else None
+                        # USD keeps an angular drive's gains per degree while
+                        # every position and limit here is per radian. See
+                        # adapters/units.py.
+                        joint_data["stiffness"] = normalize_gain(
+                            stiffness_attr.Get() if stiffness_attr else None, drive_type
+                        )
+                        joint_data["damping"] = normalize_gain(damping_attr.Get() if damping_attr else None, drive_type)
+                        joint_data["gain_units"] = gain_units(drive_type)
                         joint_data["target_position"] = target_attr.Get() if target_attr else None
                         break
                 jname = desc.GetName()
