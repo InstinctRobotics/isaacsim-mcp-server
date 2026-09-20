@@ -114,6 +114,15 @@ def test_execute_script_warns_about_live_graph():
     assert "stop" in src.lower()
 
 
+def test_get_joint_config_documents_the_gain_write_conversion():
+    # No tool writes gains, so execute_script is the only write path and this
+    # docstring is the only thing between an agent and a 57.3x drive.
+    src = _read_tool_source("simulation.py")
+    assert "gain_units" in src
+    assert "180/pi" in src
+    assert "57.3x" in src
+
+
 def test_server_instructions_cover_contracts():
     src = _read_server_source()
     assert "resets to spawn" in src.lower() or "spawn state" in src.lower()  # stop (#8)
