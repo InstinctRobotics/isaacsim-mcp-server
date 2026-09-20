@@ -209,6 +209,10 @@ def register_tools(mcp: FastMCP, get_connection: "Callable[[], IsaacConnection]"
         - Joints are oscillating or unstable (check stiffness/damping ratio)
         - Joints hit limits unexpectedly (check lower_limit/upper_limit)
 
+        Units: gains are per-radian (angular) or per-meter (linear), per each joint's
+        `gain_units`. USD stores angular gains per-degree — divide by 180/pi before
+        writing one back via execute_script, or the drive lands 57.3x stiff, silently.
+
         Args:
             prim_path: USD path to the robot articulation root.
         """
