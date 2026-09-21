@@ -1,5 +1,5 @@
 [package]
-name = "isaacsim-mcp-server"
+name = "isaac.sim.mcp_extension"
 version = "0.6.1"
 title = "Isaac Sim MCP Server"
 description = "MCP server extension for Isaac Sim to enable communication with Claude and other AI assistants"
