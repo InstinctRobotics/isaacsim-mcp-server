@@ -33,7 +33,7 @@ from .objects import prim_missing
 
 # Hardcoded fallback — used only if live discovery fails.
 # Keys are lowercase robot names, asset_path is relative to the assets root.
-# 5.1 layout. These files are still published under /Isaac/Robots/ on 6.x.
+# These files are still published under /Isaac/Robots/ on 6.x.
 FALLBACK_ROBOT_LIBRARY: Dict[str, Dict[str, str]] = {
     "frankapanda": {
         "asset_path": "/Isaac/Robots/FrankaRobotics/FrankaPanda/franka.usd",
@@ -64,63 +64,14 @@ FALLBACK_ROBOT_LIBRARY: Dict[str, Dict[str, str]] = {
     },
 }
 
-# 6.1 moved the shipped references to /Isaac/Robots_Multiphysics/. Names are
-# the 6.2.0 catalog entries, not a prefix swap: Franka and Carter gain a
-# directory, and the extension is .usda. Nova Carter has no multiphysics
-# entry in that catalog, so it stays on the legacy path.
-FALLBACK_ROBOT_LIBRARY_V6: Dict[str, Dict[str, str]] = {
-    "frankapanda": {
-        "asset_path": "/Isaac/Robots_Multiphysics/FrankaRobotics/FrankaPanda/franka/franka.usda",
-        "description": "FrankaRobotics FrankaPanda",
-        "manufacturer": "FrankaRobotics",
-    },
-    "jetbot": {
-        "asset_path": "/Isaac/Robots_Multiphysics/NVIDIA/Jetbot/jetbot.usda",
-        "description": "NVIDIA Jetbot",
-        "manufacturer": "NVIDIA",
-    },
-    "carter_v1": {
-        "asset_path": "/Isaac/Robots_Multiphysics/NVIDIA/Carter/carter_v1/carter_v1.usda",
-        "description": "NVIDIA Carter",
-        "manufacturer": "NVIDIA",
-    },
-    "novacarter": {
-        "asset_path": "/Isaac/Robots/NVIDIA/NovaCarter/nova_carter.usd",
-        "description": "NVIDIA NovaCarter",
-        "manufacturer": "NVIDIA",
-    },
-    "g1": {
-        "asset_path": "/Isaac/Robots_Multiphysics/Unitree/G1/g1.usda",
-        "description": "Unitree G1",
-        "manufacturer": "Unitree",
-    },
-    "go1": {
-        "asset_path": "/Isaac/Robots_Multiphysics/Unitree/Go1/go1.usda",
-        "description": "Unitree Go1",
-        "manufacturer": "Unitree",
-    },
-    "spot": {
-        "asset_path": "/Isaac/Robots_Multiphysics/BostonDynamics/spot/spot.usda",
-        "description": "BostonDynamics spot",
-        "manufacturer": "BostonDynamics",
-    },
-}
-
 # Cached discovered robots — populated on first call to list_robots.
 _discovered_robots: Optional[Dict[str, Dict[str, str]]] = None
-
-
-def _fallback_library(adapter: IsaacAdapterBase) -> Dict[str, Dict[str, str]]:
-    """5.1 keeps /Isaac/Robots/. 6.x prefers the multiphysics catalog."""
-    if type(adapter).__name__ == "IsaacAdapterV6":
-        return FALLBACK_ROBOT_LIBRARY_V6
-    return FALLBACK_ROBOT_LIBRARY
 
 
 def _get_robot_library(adapter: IsaacAdapterBase) -> Dict[str, Dict[str, str]]:
     """Return the robot library, discovering from the asset server on first call.
 
-    Falls back to the version's hardcoded library if discovery fails.
+    Falls back to FALLBACK_ROBOT_LIBRARY if discovery fails.
     """
     global _discovered_robots
     if _discovered_robots is not None:
@@ -135,7 +86,7 @@ def _get_robot_library(adapter: IsaacAdapterBase) -> Dict[str, Dict[str, str]]:
     except Exception as e:
         print(f"Robot discovery failed, using fallback: {e}")
 
-    _discovered_robots = _fallback_library(adapter)
+    _discovered_robots = FALLBACK_ROBOT_LIBRARY
     return _discovered_robots
 
 

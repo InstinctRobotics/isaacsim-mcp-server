@@ -127,14 +127,16 @@ class G1Simulation:
         if self.assets_root_path:
             g1_paths.extend(
                 [
-                    f"{self.assets_root_path}/Isaac/Robots_Multiphysics/Unitree/G1/g1.usda",
-                    f"{self.assets_root_path}/Isaac/Robots/Unitree/G1/g1.usd",
+                    f"{self.assets_root_path}/Isaac/Robots/Unitree/G1/g1.usd"
+                    # f"{self.assets_root_path}/Isaac/Robots/Unitree/Go1/go1.usd"
+                    # f"{self.assets_root_path}/Robots/Unitree/G1/g1.usd"
                 ]
             )
         g1_paths.extend(
             [
-                "/Isaac/Robots_Multiphysics/Unitree/G1/g1.usda",
-                "/Isaac/Robots/Unitree/G1/g1.usd",
+                "/Isaac/Robots/Unitree/G1/g1.usd"
+                # "/Isaac/Robots/Unitree/Go1/go1.usd"
+                # "/Robots/Unitree/G1/g1.usd"
             ]
         )
 

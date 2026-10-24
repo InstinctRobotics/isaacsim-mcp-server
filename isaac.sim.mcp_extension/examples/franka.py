@@ -31,9 +31,7 @@ from isaacsim.core.utils.stage import add_reference_to_stage
 from isaacsim.storage.native import get_assets_root_path
 
 assets_root_path = get_assets_root_path()
-# 6.2 catalog path. franka_alt_fingers.usd is not in Robots_Multiphysics;
-# AlternateFinger is an accessory on this asset.
-asset_path = assets_root_path + "/Isaac/Robots_Multiphysics/FrankaRobotics/FrankaPanda/franka/franka.usda"
+asset_path = assets_root_path + "/Isaac/Robots/Franka/franka_alt_fingers.usd"
 franka_robot = add_reference_to_stage(asset_path, "/World/Franka")
 # cre_prim("/DistantLight", "DistantLight")
 
