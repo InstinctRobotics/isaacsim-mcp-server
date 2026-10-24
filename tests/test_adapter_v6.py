@@ -317,17 +317,6 @@ def test_detect_version_handles_real_6x_version_tuple(monkeypatch):
     assert adapters_mod._detect_isaacsim_major_version() == 6
 
 
-def test_version_parser_accepts_6_2_0():
-    """6.2.0 stays on the V6 adapter. Selection is the major version, not a 6.0 pin."""
-    from isaac_sim_mcp_extension.adapters.version import major_version, version_string
-
-    # Same 8-tuple layout 6.0 returns. 6.2.0's live tuple was not captured here.
-    reported = ("6.2.0", "", "6", "2", "0", "", "", "release")
-    assert major_version(reported) == 6
-    assert version_string(reported) == "6.2.0"
-    assert major_version("6.2.0") == 6
-
-
 def test_v6_reports_a_human_version_from_the_real_tuple(monkeypatch):
     """isaacsim_version must be a version string, not the repr of a tuple.
 

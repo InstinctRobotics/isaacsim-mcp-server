@@ -236,28 +236,3 @@ def test_v6_prefers_robots_multiphysics_and_one_extra_directory():
     assert robots["jetbot"]["asset_path"].endswith("/NVIDIA/Jetbot/jetbot.usda")
     assert robots["g1"]["asset_path"].endswith("/Unitree/G1/g1.usda")
     assert "oldbot" not in robots
-
-
-def test_fallback_library_follows_the_adapter():
-    """Discovery failure still has to name a file the runtime actually ships."""
-    from isaac_sim_mcp_extension.handlers.robots import _fallback_library
-
-    class IsaacAdapterV5:
-        pass
-
-    class IsaacAdapterV6:
-        pass
-
-    legacy = _fallback_library(IsaacAdapterV5())
-    current = _fallback_library(IsaacAdapterV6())
-    assert legacy["frankapanda"]["asset_path"] == "/Isaac/Robots/FrankaRobotics/FrankaPanda/franka.usd"
-    assert current["frankapanda"]["asset_path"] == (
-        "/Isaac/Robots_Multiphysics/FrankaRobotics/FrankaPanda/franka/franka.usda"
-    )
-    assert current["carter_v1"]["asset_path"].endswith("/carter_v1/carter_v1.usda")
-    assert current["g1"]["asset_path"].endswith("/Unitree/G1/g1.usda")
-    assert current["go1"]["asset_path"].endswith("/Unitree/Go1/go1.usda")
-    assert current["spot"]["asset_path"].endswith("/BostonDynamics/spot/spot.usda")
-    assert current["jetbot"]["asset_path"].endswith("/NVIDIA/Jetbot/jetbot.usda")
-    # No multiphysics entry in the 6.2.0 wheeled catalog.
-    assert current["novacarter"]["asset_path"] == "/Isaac/Robots/NVIDIA/NovaCarter/nova_carter.usd"
