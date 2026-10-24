@@ -21,7 +21,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-"""Isaac Sim 6.0.0 adapter implementation (PhysX + Newton)."""
+"""Isaac Sim 6.x adapter implementation (6.0 through 6.2, PhysX + Newton)."""
 
 from __future__ import annotations
 
@@ -73,7 +73,7 @@ def _recompile_scriptnodes_for_file(abs_path: str) -> list:
 
 
 class IsaacAdapterV6(IsaacAdapterBase):
-    """Adapter for Isaac Sim 6.0.0 — backend-neutral (PhysX + Newton)."""
+    """Adapter for Isaac Sim 6.x (6.0 through 6.2) — backend-neutral (PhysX + Newton)."""
 
     def __init__(self) -> None:
         super().__init__()

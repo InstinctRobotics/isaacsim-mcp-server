@@ -33,6 +33,7 @@ from .objects import prim_missing
 
 # Hardcoded fallback — used only if live discovery fails.
 # Keys are lowercase robot names, asset_path is relative to the assets root.
+# These files are still published under /Isaac/Robots/ on 6.x.
 FALLBACK_ROBOT_LIBRARY: Dict[str, Dict[str, str]] = {
     "frankapanda": {
         "asset_path": "/Isaac/Robots/FrankaRobotics/FrankaPanda/franka.usd",

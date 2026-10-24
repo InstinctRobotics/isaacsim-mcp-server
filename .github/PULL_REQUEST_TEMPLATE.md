@@ -20,7 +20,7 @@ List every Isaac Sim version you have tested this PR against.
 Running unit tests alone is NOT sufficient — you must verify the behavior
 inside a running Isaac Sim instance.
 
-6.0 ships two physics backends and they are separate runtimes, not a detail:
+6.x ships two physics backends and they are separate runtimes, not a detail:
 a fault that appears on one and not the other is itself the finding. Tick the
 one(s) you actually ran, and say which you did not — stating a gap is fine,
 implying coverage you do not have is not.
@@ -28,8 +28,8 @@ implying coverage you do not have is not.
 Only one Isaac Sim instance can run per GPU, so these are sequential runs.
 -->
 
-- [ ] Isaac Sim 6.0.x — PhysX (`isaac-sim.sh`)
-- [ ] Isaac Sim 6.0.x — Newton (`isaac-sim.newton.sh`)
+- [ ] Isaac Sim 6.x — PhysX (`isaac-sim.sh`)
+- [ ] Isaac Sim 6.x — Newton (`isaac-sim.newton.sh`)
 - [ ] Isaac Sim 5.1.x
 - [ ] Other (please specify):
 
