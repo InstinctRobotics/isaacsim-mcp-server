@@ -32,7 +32,9 @@ from isaacsim.storage.native import get_assets_root_path
 
 # Get the path to the Franka robot asset
 assets_root_path = get_assets_root_path()
-asset_path = assets_root_path + "/Isaac/Robots/Franka/franka_alt_fingers.usd"
+# 6.2 catalog path. franka_alt_fingers.usd is not in Robots_Multiphysics;
+# AlternateFinger is an accessory on this asset.
+asset_path = assets_root_path + "/Isaac/Robots_Multiphysics/FrankaRobotics/FrankaPanda/franka/franka.usda"
 
 
 # Create a 3x3 grid of Franka robots

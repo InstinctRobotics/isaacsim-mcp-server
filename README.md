@@ -3,7 +3,7 @@
 <!-- mcp-name: io.github.whats2000/isaacsim-mcp-server -->
 
 [![PyPI version](https://img.shields.io/pypi/v/isaacsim-mcp-server)](https://pypi.org/project/isaacsim-mcp-server/)
-[![Isaac Sim 5.1.0 - 6.0.1](https://img.shields.io/badge/Isaac_Sim-5.1.0_--_6.0.1-76b900)](https://developer.nvidia.com/isaac-sim)
+[![Isaac Sim 5.1.0 - 6.2.0](https://img.shields.io/badge/Isaac_Sim-5.1.0_--_6.2.0-76b900)](https://developer.nvidia.com/isaac-sim)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-blue)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![MCP Quality](https://archestra.ai/mcp-catalog/api/badge/quality/whats2000/isaacsim-mcp-server)](https://archestra.ai/mcp-catalog/api/badge/quality/whats2000/isaacsim-mcp-server)
@@ -24,7 +24,7 @@ Connect any MCP-compatible IDE (Cursor, VS Code, Claude Code, Windsurf, Antigrav
 - **Step-and-observe** debugging -- step the simulation and inspect prim positions, joint states, and physics in one call
 - **Hot-reload** -- iterate on Python controllers without restarting Isaac Sim
 - **Multi-instance** -- run multiple Isaac Sim sessions side by side on different ports
-- Built for **Isaac Sim 5.1.0 - 6.0.1** (PhysX + Newton) with a modular adapter layer for version isolation
+- Built for **Isaac Sim 5.1.0 - 6.2.0** (PhysX + Newton) with a modular adapter layer for version isolation
 
 ---
 
@@ -50,7 +50,7 @@ cd isaacsim-mcp-server
 
 | Requirement | Version |
 |-------------|---------|
-| NVIDIA Isaac Sim | `5.1.0` - `6.0.1` (PhysX or Newton) |
+| NVIDIA Isaac Sim | `5.1.0` - `6.2.0` (PhysX or Newton) |
 | Python | `3.10+` |
 | `uv` | latest (for source install) |
 | Platform | Linux (Ubuntu 22.04+) or Windows 10/11 |
@@ -381,7 +381,7 @@ isaacsim-mcp-server          (PyPI package / CLI)
 isaac.sim.mcp_extension      (Omniverse extension)
       |
       v
-Handlers -> Adapter -> Isaac Sim 5.1 / 6.0 APIs
+Handlers -> Adapter -> Isaac Sim 5.1 / 6.x APIs
 ```
 
 ---

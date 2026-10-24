@@ -192,3 +192,72 @@ def test_colliding_model_names_keep_a_consistent_record(cls_name):
     assert f"/Isaac/Robots/{rec['manufacturer']}/" in rec["asset_path"], rec
     assert rec["manufacturer"] == "BetaCorp"  # shorter filename won
     assert rec["description"] == "BetaCorp shared"
+
+
+def test_v6_prefers_robots_multiphysics_and_one_extra_directory():
+    """6.1 moved shipped references to Robots_Multiphysics.
+
+    Several 6.2 catalog entries are one directory deeper than the legacy
+    layout and use .usda (FrankaPanda/franka/franka.usda). A file in that
+    directory whose name does not match the directory is not a robot.
+    When the multiphysics tree lists, the legacy tree is not scanned.
+    """
+    tree = {
+        "ROOT/Isaac/Robots_Multiphysics/": ["FrankaRobotics/", "NVIDIA/", "Unitree/"],
+        "ROOT/Isaac/Robots_Multiphysics/FrankaRobotics/": ["FrankaPanda/", ".thumbs/"],
+        "ROOT/Isaac/Robots_Multiphysics/FrankaRobotics/FrankaPanda/": ["franka/", "notes.txt"],
+        "ROOT/Isaac/Robots_Multiphysics/FrankaRobotics/FrankaPanda/franka/": [
+            "franka.usda",
+            "config.usd",
+            "franka.thumb.usd",
+        ],
+        "ROOT/Isaac/Robots_Multiphysics/NVIDIA/": ["Jetbot/", "Carter/"],
+        "ROOT/Isaac/Robots_Multiphysics/NVIDIA/Jetbot/": ["jetbot.usda"],
+        "ROOT/Isaac/Robots_Multiphysics/NVIDIA/Carter/": ["carter_v1/"],
+        "ROOT/Isaac/Robots_Multiphysics/NVIDIA/Carter/carter_v1/": ["carter_v1.usda"],
+        "ROOT/Isaac/Robots_Multiphysics/Unitree/": ["G1/"],
+        "ROOT/Isaac/Robots_Multiphysics/Unitree/G1/": ["g1.usda"],
+        # Present, and must be ignored once the multiphysics listing succeeds.
+        "ROOT/Isaac/Robots/": ["LegacyCo/"],
+        "ROOT/Isaac/Robots/LegacyCo/": ["oldbot/"],
+        "ROOT/Isaac/Robots/LegacyCo/oldbot/": ["oldbot.usd"],
+    }
+    mp = pytest.MonkeyPatch()
+    try:
+        robots = _run_discovery(mp, tree, "IsaacAdapterV6")
+    finally:
+        mp.undo()
+
+    assert set(robots) == {"frankapanda", "jetbot", "carter", "g1"}
+    assert robots["frankapanda"]["asset_path"] == (
+        "/Isaac/Robots_Multiphysics/FrankaRobotics/FrankaPanda/franka/franka.usda"
+    )
+    assert robots["carter"]["asset_path"].endswith("/NVIDIA/Carter/carter_v1/carter_v1.usda")
+    assert robots["jetbot"]["asset_path"].endswith("/NVIDIA/Jetbot/jetbot.usda")
+    assert robots["g1"]["asset_path"].endswith("/Unitree/G1/g1.usda")
+    assert "oldbot" not in robots
+
+
+def test_fallback_library_follows_the_adapter():
+    """Discovery failure still has to name a file the runtime actually ships."""
+    from isaac_sim_mcp_extension.handlers.robots import _fallback_library
+
+    class IsaacAdapterV5:
+        pass
+
+    class IsaacAdapterV6:
+        pass
+
+    legacy = _fallback_library(IsaacAdapterV5())
+    current = _fallback_library(IsaacAdapterV6())
+    assert legacy["frankapanda"]["asset_path"] == "/Isaac/Robots/FrankaRobotics/FrankaPanda/franka.usd"
+    assert current["frankapanda"]["asset_path"] == (
+        "/Isaac/Robots_Multiphysics/FrankaRobotics/FrankaPanda/franka/franka.usda"
+    )
+    assert current["carter_v1"]["asset_path"].endswith("/carter_v1/carter_v1.usda")
+    assert current["g1"]["asset_path"].endswith("/Unitree/G1/g1.usda")
+    assert current["go1"]["asset_path"].endswith("/Unitree/Go1/go1.usda")
+    assert current["spot"]["asset_path"].endswith("/BostonDynamics/spot/spot.usda")
+    assert current["jetbot"]["asset_path"].endswith("/NVIDIA/Jetbot/jetbot.usda")
+    # No multiphysics entry in the 6.2.0 wheeled catalog.
+    assert current["novacarter"]["asset_path"] == "/Isaac/Robots/NVIDIA/NovaCarter/nova_carter.usd"

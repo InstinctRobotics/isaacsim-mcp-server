@@ -21,7 +21,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-"""Isaac Sim 6.0.0 adapter implementation (PhysX + Newton)."""
+"""Isaac Sim 6.x adapter implementation (6.0 through 6.2, PhysX + Newton)."""
 
 from __future__ import annotations
 
@@ -73,7 +73,7 @@ def _recompile_scriptnodes_for_file(abs_path: str) -> list:
 
 
 class IsaacAdapterV6(IsaacAdapterBase):
-    """Adapter for Isaac Sim 6.0.0 — backend-neutral (PhysX + Newton)."""
+    """Adapter for Isaac Sim 6.x (6.0 through 6.2) — backend-neutral (PhysX + Newton)."""
 
     def __init__(self) -> None:
         super().__init__()
@@ -488,12 +488,22 @@ class IsaacAdapterV6(IsaacAdapterBase):
         from isaacsim.storage.native import get_assets_root_path
 
         root = get_assets_root_path()
-        robots_base = root + "/Isaac/Robots/"
         discovered: Dict[str, Dict[str, str]] = {}
 
+        # 6.1 moved the shipped robot references to Robots_Multiphysics. The
+        # legacy tree is still published through 6.2 (and is all 6.0 discovery
+        # had), so a missing multiphysics listing falls back to it. 5.1 never
+        # reaches this adapter.
+        rel_root = "/Isaac/Robots_Multiphysics"
+        robots_base = root + rel_root + "/"
         result, manufacturers = omni.client.list(robots_base)
         if result != omni.client.Result.OK:
-            return discovered
+            rel_root = "/Isaac/Robots"
+            robots_base = root + rel_root + "/"
+            result, manufacturers = omni.client.list(robots_base)
+            if result != omni.client.Result.OK:
+                return discovered
+        multiphysics = rel_root == "/Isaac/Robots_Multiphysics"
 
         # The walk is a few hundred directory listings over three levels. Run
         # each level concurrently: the calls are network round-trips against the
@@ -536,34 +546,54 @@ class IsaacAdapterV6(IsaacAdapterBase):
         ]
         model_files = _map([f"{robots_base}{mfr}/{model}/" for mfr, model in pairs])
 
-        for (mfr_name, model_name), files in zip(pairs, model_files):
-            for file_entry in files:
-                fname = file_entry.relative_path
-                if not (fname.endswith(".usd") or fname.endswith(".usda")):
-                    continue
-                if fname.endswith(".thumb.usd"):
-                    continue  # preview image, not a robot
-                asset_rel = f"/Isaac/Robots/{mfr_name}/{model_name}/{fname}"
-
-                key = model_name.lower().replace(" ", "_")
-                if key in discovered:
-                    # Keep the simpler filename (shorter name wins). Rewrite the
-                    # whole record, not just the path: two manufacturers can ship
-                    # the same model directory name, and updating the path alone
-                    # left entries describing one vendor while pointing at
-                    # another's asset.
-                    if len(fname) < len(discovered[key]["asset_path"].split("/")[-1]):
-                        discovered[key] = {
-                            "asset_path": asset_rel,
-                            "description": f"{mfr_name} {model_name}",
-                            "manufacturer": mfr_name,
-                        }
-                else:
+        def _record(mfr_name: str, model_name: str, rel_name: str) -> None:
+            if rel_name.endswith(".thumb.usd"):
+                return  # preview image, not a robot
+            if not (rel_name.endswith(".usd") or rel_name.endswith(".usda")):
+                return
+            asset_rel = f"{rel_root}/{mfr_name}/{model_name}/{rel_name}"
+            key = model_name.lower().replace(" ", "_")
+            leaf = rel_name.rsplit("/", 1)[-1]
+            if key in discovered:
+                # Keep the simpler filename (shorter name wins). Rewrite the
+                # whole record, not just the path: two manufacturers can ship
+                # the same model directory name, and updating the path alone
+                # left entries describing one vendor while pointing at
+                # another's asset.
+                if len(leaf) < len(discovered[key]["asset_path"].split("/")[-1]):
                     discovered[key] = {
                         "asset_path": asset_rel,
                         "description": f"{mfr_name} {model_name}",
                         "manufacturer": mfr_name,
                     }
+            else:
+                discovered[key] = {
+                    "asset_path": asset_rel,
+                    "description": f"{mfr_name} {model_name}",
+                    "manufacturer": mfr_name,
+                }
+
+        # Multiphysics assets are often one directory deeper than the legacy
+        # tree (FrankaPanda/franka/franka.usda, Carter/carter_v1/carter_v1.usda).
+        # Only a file named after that directory is the catalog robot; other
+        # USD in the folder are configs and props.
+        nested_dirs = []
+        for (mfr_name, model_name), files in zip(pairs, model_files):
+            for file_entry in files:
+                fname = file_entry.relative_path
+                if fname.endswith(".usd") or fname.endswith(".usda"):
+                    _record(mfr_name, model_name, fname)
+                elif multiphysics and not fname.lstrip("/").startswith("."):
+                    nested_dirs.append((mfr_name, model_name, fname.strip("/")))
+
+        if nested_dirs:
+            nested_lists = _map([f"{robots_base}{mfr}/{model}/{sub}/" for mfr, model, sub in nested_dirs])
+            for (mfr_name, model_name, sub), files in zip(nested_dirs, nested_lists):
+                for file_entry in files:
+                    fname = file_entry.relative_path
+                    if fname.rsplit(".", 1)[0] != sub:
+                        continue
+                    _record(mfr_name, model_name, f"{sub}/{fname}")
         return discovered
 
     def get_robot_joint_info(self, prim_path: str) -> Dict[str, Any]:
